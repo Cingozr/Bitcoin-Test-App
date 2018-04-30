@@ -1,0 +1,84 @@
+﻿@model List<BlockchainExample.Models.Wallet>
+@{
+    ViewBag.Title = "Index";
+}
+
+@if (Model.Count() > 0)
+{
+    <br />
+    <hr />
+    <a href="@Url.Action("CreateWallet","Coin")" class="btn btn-success btn-block">Cüzdan Ekle</a>
+    <hr />
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>#ID</th>
+                <th>Public Key</th>
+                <th>Bakiye</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.PublicKey</td>
+                    <td>@item.Balance.ToString("0.00000000 BTC")</td>
+                    <td>
+                        <a href="javascript:;" onclick="BalanceCheck(@item.Id)" class="btn btn-info">Bakiye Kontrol</a>
+                        <a href="@Url.Action("BtcSendDetail","Coin",new { Id=item.Id})" class="btn btn-success">Btc Aktar</a>
+                        <a href="@Url.Action("WalletDelete","Coin",new { Id=item.Id })" class="btn btn-danger">Sil</a>
+                    </td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+
+    <table id="balanceResult" class="table table-hover" style="display:none">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Transaction Url</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+}
+else
+{
+    <br />
+    <hr />
+    <p class="text-center text-warning">Henüz Cüzdan Eklenmemiş</p>
+    <a href="@Url.Action("CreateWallet","Coin")" class="btn btn-success btn-block">Cüzdan Ekle</a>
+    <hr />
+}
+
+
+@section scripts{
+
+    <script>
+        function BalanceCheck(Id) {
+
+            var model = {  Id: Id }
+
+            $.get("@Url.Action("BalanceCheck", "Coin")", model, function (response) {
+                console.log(response)
+
+                if (response.State) {
+                    var tdTemplate = "<td>" + response.Id + "</td><td>" + response.TransactionUrl + "</td><td>" + response.Balance + "</td>";
+                    var trTemplate = "<tr>" + tdTemplate + "</tr>";
+
+                    $("#balanceResult").show();
+                    $("#balanceResult tbody").append(trTemplate);
+                } else {
+                    alert(response.Msg);
+                }
+            });
+        }
+    </script>
+
+}
